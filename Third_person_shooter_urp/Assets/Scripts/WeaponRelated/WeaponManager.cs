@@ -10,6 +10,7 @@ public class WeaponManager : MonoBehaviour
     private float _fireRateTimer;
     private float _timer;
     private StarterAssetsInputs _input;
+    private float _fireEffectTimer = 0.3f;
 
     [SerializeField] private GameObject bullet;
     [SerializeField] private Transform barrelPosition;
@@ -17,16 +18,16 @@ public class WeaponManager : MonoBehaviour
     [SerializeField] private int bulletPerShot;
     [SerializeField] private GameObject aimTarget;
     [SerializeField] private GameObject fireEffect;
+    private WeaponAmmoSystem _ammo;
 
     [SerializeField] private AudioClip gunShot;
     private AudioSource _audioSource;
 
-    
-    
-    
+
     // Start is called before the first frame update
     private void Start()
     {
+        _ammo = GetComponent<WeaponAmmoSystem>();
         fireEffect.SetActive(false);
         _audioSource = GetComponent<AudioSource>();
         _input = GetComponentInParent<StarterAssetsInputs>();
@@ -40,13 +41,24 @@ public class WeaponManager : MonoBehaviour
         {
             Fire();
         }
+        _fireEffectTimer -= Time.deltaTime;
+
+        if (_fireEffectTimer <=0)
+        {
+            fireEffect.SetActive(false);
+        }
     }
 
     private bool ShouldFire()
     {
         _fireRateTimer += Time.deltaTime;
-        
+
         if (_fireRateTimer < fireRate)
+        {
+            return false;
+        }
+
+        if (_ammo.currentAmmo == 0)
         {
             return false;
         }
@@ -61,27 +73,17 @@ public class WeaponManager : MonoBehaviour
 
     private void Fire()
     {
+        _fireEffectTimer = 0.3f;
+        fireEffect.SetActive(true);
         _fireRateTimer = 0;
+        _audioSource.PlayOneShot(gunShot);
         barrelPosition.LookAt(aimTarget.transform.position);
-
+        _ammo.currentAmmo--;
         for (int nbOfShoot = 0; nbOfShoot < bulletPerShot; nbOfShoot++)
         {
-            fireEffect.SetActive(true);
-            _audioSource.PlayOneShot(gunShot);
             GameObject actualBullet = Instantiate(bullet, barrelPosition.position, barrelPosition.rotation);
             Rigidbody rbe = actualBullet.GetComponent<Rigidbody>();
             rbe.AddForce(barrelPosition.forward * bulletVelocity, ForceMode.Impulse);
         }
-
-        fireEffect.SetActive(false);
-    }
-
-
-    private void activeFireEffect()
-    {
-        
-        _timer += Time.deltaTime;
-        
-        
     }
 }

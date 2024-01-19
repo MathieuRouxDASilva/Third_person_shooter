@@ -26,6 +26,9 @@ namespace StarterAssets
 		[Header("shoot system")] 
 		public bool isShooting = false;
 		
+		[Header("reload system")] 
+		public bool isReloading = false;
+		
 #if ENABLE_INPUT_SYSTEM
 		public void OnMove(InputValue value)
 		{
@@ -58,6 +61,11 @@ namespace StarterAssets
 		public void OnShoot(InputValue value)
 		{
 			isShooting = value.isPressed;
+		}
+
+		public void OnReload(InputValue value)
+		{
+			isReloading = value.isPressed;
 		}
 		
 #endif
